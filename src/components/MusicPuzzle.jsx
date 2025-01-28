@@ -11,7 +11,7 @@ import {
   AlertDialogCancel,
 } from "./ui/alert-dialog";
 import { Loader2 } from "lucide-react";
-import victoryMusicFile from '../assets/also-sprach-zarathustra.ogg';
+import victoryMusicFile from "../assets/also-sprach-zarathustra.ogg";
 
 const MusicPuzzle = () => {
   const [sequence, setSequence] = useState([]);
@@ -59,7 +59,7 @@ const MusicPuzzle = () => {
     // Initialize audio context and victory music
     const context = new (window.AudioContext || window.webkitAudioContext)();
     setAudioContext(context);
-    
+
     const audio = new Audio(victoryMusicFile);
     audio.loop = true;
     audio.volume = 0.7;
@@ -72,7 +72,7 @@ const MusicPuzzle = () => {
         audio.pause();
         audio.currentTime = 0;
       }
-      if (context.state !== 'closed') {
+      if (context.state !== "closed") {
         context.close();
       }
     };
@@ -84,7 +84,7 @@ const MusicPuzzle = () => {
       if (!audioContext) return;
 
       // Resume AudioContext if it's suspended
-      if (audioContext.state === 'suspended') {
+      if (audioContext.state === "suspended") {
         await audioContext.resume();
       }
 
@@ -112,15 +112,15 @@ const MusicPuzzle = () => {
   const playVictoryMusic = useCallback(async () => {
     try {
       // Resume AudioContext if it's suspended
-      if (audioContext?.state === 'suspended') {
+      if (audioContext?.state === "suspended") {
         await audioContext.resume();
       }
-      
+
       const audio = victoryMusic.current;
       audio.currentTime = 0;
       await audio.play();
     } catch (error) {
-      console.error('Error playing victory music:', error);
+      console.error("Error playing victory music:", error);
     }
   }, [audioContext]);
 
@@ -139,7 +139,7 @@ const MusicPuzzle = () => {
 
     setIsPlaying(false);
     setIsUnlocking(true);
-    
+
     // Aguarda um momento antes de mostrar a mensagem de sucesso e tocar a música
     setTimeout(() => {
       setShowSuccess(true);
@@ -267,7 +267,9 @@ const MusicPuzzle = () => {
       <AlertDialog open={isCorrect}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Sequência Correta!</AlertDialogTitle>
+            <AlertDialogTitle>
+              Sequência Correta Acesso concedido
+            </AlertDialogTitle>
             <AlertDialogDescription>
               {isUnlocking ? (
                 <div className="flex items-center space-x-2">
@@ -276,8 +278,12 @@ const MusicPuzzle = () => {
                 </div>
               ) : showSuccess ? (
                 <div className="text-center">
-                  <p className="text-lg font-semibold mb-2">Acesso concedido para o Relicário Nephallen!</p>
-                  <p className="text-sm text-gray-400">A música ancestral ecoa através dos corredores...</p>
+                  <p className="text-lg font-semibold mb-2">
+                    Acesso concedido para o Relicário Nephallen!
+                  </p>
+                  <p className="text-sm text-gray-400">
+                    A música ancestral ecoa através dos corredores...
+                  </p>
                 </div>
               ) : null}
             </AlertDialogDescription>
