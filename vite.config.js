@@ -10,6 +10,6 @@ export default defineConfig({
   css: {
     postcss: "./postcss.config.js",
   },
-  assetsInclude: ["**/*.ogg"],
+  assetsInclude: ["**/*.ogg", "**/*.mp4"],
   publicDir: "public",
 });

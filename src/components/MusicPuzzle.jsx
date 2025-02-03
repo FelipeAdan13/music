@@ -12,6 +12,7 @@ import {
 } from "./ui/alert-dialog";
 import { Loader2 } from "lucide-react";
 import victoryMusicFile from "../assets/also-sprach-zarathustra.ogg";
+import videoFile from "../assets/Felipe_Adan_Gomes_A_captivating_cinematic_portrayal_of_a_colossal,_a_13930ba3-4b51-46a9-8616-22a518e2ee30.mp4";
 
 const MusicPuzzle = () => {
   const [sequence, setSequence] = useState([]);
@@ -20,6 +21,9 @@ const MusicPuzzle = () => {
   const [audioContext, setAudioContext] = useState(null);
   const [isUnlocking, setIsUnlocking] = useState(false);
   const victoryMusic = useRef(null);
+  const videoRef = useRef(null);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
 
   const [attempts, setAttempts] = useState(0);
   const [revealedClues, setRevealedClues] = useState(0);
@@ -30,12 +34,12 @@ const MusicPuzzle = () => {
   const visualClues = [
     {
       symbol: "○●○",
-      text: "O ciclo é infinito, inicio meio e fim, repitindo-se em padrões perpetuos",
+      text: "O ciclo é infinito, início meio e fim, repetindo-se em padrões perpétuos",
       threshold: 2,
     },
     {
       symbol: "↑↑↑",
-      text: "A melodia, com seus padrões hipinoticos, tráz ordem, ao caos da existencia",
+      text: "A melodia, com seus padrões hipnóticos, traz ordem ao caos da existência",
       threshold: 4,
     },
     {
@@ -57,25 +61,29 @@ const MusicPuzzle = () => {
 
   useEffect(() => {
     // Initialize audio context and victory music
-    const context = new (window.AudioContext || window.webkitAudioContext)();
-    setAudioContext(context);
+    try {
+      const context = new (window.AudioContext || window.webkitAudioContext)();
+      setAudioContext(context);
 
-    const audio = new Audio(victoryMusicFile);
-    audio.loop = true;
-    audio.volume = 0.7;
-    victoryMusic.current = audio;
+      const audio = new Audio(victoryMusicFile);
+      audio.loop = true;
+      audio.volume = 0.7;
+      victoryMusic.current = audio;
 
-    // Cleanup function
-    return () => {
-      const audio = victoryMusic.current;
-      if (audio) {
-        audio.pause();
-        audio.currentTime = 0;
-      }
-      if (context.state !== "closed") {
-        context.close();
-      }
-    };
+      // Cleanup function
+      return () => {
+        const audio = victoryMusic.current;
+        if (audio) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+        if (context && context.state !== "closed") {
+          context.close();
+        }
+      };
+    } catch (error) {
+      console.error("Failed to initialize audio context:", error);
+    }
   }, []);
 
   // Função para tocar uma nota
@@ -140,11 +148,40 @@ const MusicPuzzle = () => {
     setIsPlaying(false);
     setIsUnlocking(true);
 
-    // Aguarda um momento antes de mostrar a mensagem de sucesso e tocar a música
-    setTimeout(() => {
+    // Primeiro timer: Mostra a mensagem de sucesso após 2 segundos
+    const successTimer = setTimeout(() => {
+      setIsUnlocking(false);
       setShowSuccess(true);
       playVictoryMusic();
     }, 2000);
+
+    // Segundo timer: Fecha o alert e mostra o vídeo após 12 segundos (2s + 10s)
+    const videoTimer = setTimeout(() => {
+      setIsCorrect(false);
+      setShowSuccess(false);
+      setIsUnlocking(false);
+      setShowVideo(true);
+
+      if (videoRef.current) {
+        videoRef.current.style.position = "fixed";
+        videoRef.current.style.top = "0";
+        videoRef.current.style.left = "0";
+        videoRef.current.style.width = "100%";
+        videoRef.current.style.height = "100%";
+        videoRef.current.style.zIndex = "9999";
+        videoRef.current.style.objectFit = "contain";
+        videoRef.current.style.backgroundColor = "black";
+        videoRef.current.play().catch((error) => {
+          console.error("Error playing video:", error);
+        });
+      }
+    }, 12000);
+
+    // Cleanup function para ambos os timers
+    return () => {
+      clearTimeout(successTimer);
+      clearTimeout(videoTimer);
+    };
   }, [audioContext, playNote, playVictoryMusic]);
 
   const handleNoteClick = async (note) => {
@@ -268,7 +305,7 @@ const MusicPuzzle = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Sequência Correta Acesso concedido
+              Sequência Correta - Acesso Concedido
             </AlertDialogTitle>
             <AlertDialogDescription>
               {isUnlocking ? (
@@ -278,11 +315,8 @@ const MusicPuzzle = () => {
                 </div>
               ) : showSuccess ? (
                 <div className="text-center">
-                  <p className="text-lg font-semibold mb-2">
-                    Acesso concedido para o Relicário Nephallen!
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    A música ancestral ecoa através dos corredores...
+                  <p className="text-2xl font-semibold text-green-500">
+                    Bem-vindo ao Relicário Nephallen!
                   </p>
                 </div>
               ) : null}
@@ -290,6 +324,23 @@ const MusicPuzzle = () => {
           </AlertDialogHeader>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Video element outside of alert dialog */}
+      <video
+        ref={videoRef}
+        className={showVideo ? "" : "hidden"}
+        playsInline
+        loop
+        src={videoFile}
+        onLoadedData={() => {
+          setVideoLoaded(true);
+          setIsUnlocking(false);
+        }}
+        onError={(e) => {
+          console.error("Video error:", e);
+          setIsUnlocking(false);
+        }}
+      />
     </div>
   );
 };

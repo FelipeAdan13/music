@@ -12,6 +12,7 @@
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.5",
     "lucide-react": "^0.474.0",
+    "music": "file:",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
